@@ -1,5 +1,6 @@
 package com.example.trabalhoo_api_1.controller;
 
+import com.example.trabalhoo_api_1.dto.DestinationDTO;
 import com.example.trabalhoo_api_1.entity.Destination;
 import com.example.trabalhoo_api_1.service.DestinationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,10 +9,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/Destination")
+@RequestMapping("/destinations")
+
 public class DestinationController {
 
     @Autowired
@@ -31,25 +34,26 @@ public class DestinationController {
     }
 
 
-    @GetMapping("/search")
-    public List<Destination> searchDestinations(@RequestParam String query) {
-        return destinationService.searchDestinations(query);
-    }
-
-
     @GetMapping("/{id}")
     public ResponseEntity<Destination> getDestinationById(@PathVariable Long id) {
         Optional<Destination> destination = destinationService.getDestinationById(id);
-        return destination.map(ResponseEntity::ok)
+        return destination
+                //.map(this::convert)
+                .map(ResponseEntity::ok)
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
 
-    @PostMapping("/{id}/reserve")
-    public ResponseEntity<Destination> reservePackage(@PathVariable Long id) {
+    @PostMapping("/reserve/{id}")
+    public ResponseEntity<?> reserveDestination(@PathVariable Long id) {
         Optional<Destination> reservedDestination = destinationService.reservePackage(id);
+
+        if(reservedDestination.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "Reserva não existe ou ja esta reservada"));
+        }
         return reservedDestination.map(ResponseEntity::ok)
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+
     }
 
 
@@ -60,9 +64,5 @@ public class DestinationController {
                 : new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    @GetMapping("/reserved")
-    public List<Destination> getReservedDestinations() {
-        return destinationService.getReservedDestinations();
-    }
 
 }

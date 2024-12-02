@@ -1,65 +1,75 @@
 package com.example.trabalhoo_api_1.service;
 
 import com.example.trabalhoo_api_1.entity.Destination;
+import com.example.trabalhoo_api_1.repository.DestinationRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class DestinationService {
-    private final List<Destination> destinations = new ArrayList<>();
 
-    // Método para adicionar um destino
+    @Autowired
+    private DestinationRepository destinationRepository;
+
+
     public Destination addDestination(Destination destination) {
-        // Encontra o maior ID atual e define o próximo ID manualmente
-        Long nextId = destinations.stream()
-                .mapToLong(Destination::getId)
-                .max()
-                .orElse(0L) + 1;
-        destination.setId(nextId);
-        destinations.add(destination);
-        return destination;
+        return destinationRepository.save(destination);
     }
 
-    // Listar todos os destinos
+
     public List<Destination> getAllDestinations() {
-        return new ArrayList<>(destinations);
+        return destinationRepository.findAll();
     }
 
-    // Buscar destinos por nome ou localização
-    public List<Destination> searchDestinations(String query) {
-        return destinations.stream()
-                .filter(d -> d.getNome().toLowerCase().contains(query.toLowerCase()) ||
-                        d.getLocalizacao().toLowerCase().contains(query.toLowerCase()))
-                .collect(Collectors.toList());
+    public Optional<Destination> updateDestination(Long id, Destination updatedDestination) {
+        Optional<Destination> existingDestination = destinationRepository.findById(id);
+
+        if (existingDestination.isPresent()) {
+            Destination destination = existingDestination.get();
+            destination.setNome(updatedDestination.getNome());
+            destination.setLocalizacao(updatedDestination.getLocalizacao());
+            destination.setDisponivel(updatedDestination.isDisponivel());
+            destinationRepository.save(destination);
+            return Optional.of(destination);
+        }
+
+        return Optional.empty();
     }
 
-    // Visualizar informações de um destino específico
+
     public Optional<Destination> getDestinationById(Long id) {
-        return destinations.stream()
-                .filter(d -> d.getId().equals(id))
-                .findFirst();
+        return destinationRepository.findById(id);
     }
 
-    // Reservar pacote de viagem (marcar como indisponível)
+
     public Optional<Destination> reservePackage(Long id) {
-        Optional<Destination> destination = getDestinationById(id);
-        destination.ifPresent(d -> d.setDisponivel(false));
-        return destination;
+        Optional<Destination> destination = destinationRepository.findById(id);
+        if (destination.isPresent()) {
+            Destination d = destination.get();
+            if (!d.isDisponivel()) {
+                return Optional.empty();
+            }
+            d.setDisponivel(false);
+            destinationRepository.save(d);
+            return Optional.of(d);
+        }
+        return Optional.empty();
     }
 
-    // Excluir um destino
+
     public boolean deleteDestination(Long id) {
-        return destinations.removeIf(d -> d.getId().equals(id));
+        if (destinationRepository.existsById(id)) {
+            destinationRepository.deleteById(id);
+            return true;
+        }
+        return false;
     }
 
-    public List<Destination> getReservedDestinations() {
-        return destinations.stream()
-                .filter(destination -> !destination.isDisponivel())
-                .collect(Collectors.toList());
-    }
+
+
+
 
 }

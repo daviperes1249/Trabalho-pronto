@@ -1,20 +1,22 @@
 package com.example.trabalhoo_api_1.entity;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
+@Entity
 public class Destination {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String nome;
     private String localizacao;
-    private String descricao;
-    private boolean disponivel;
+    private boolean disponivel = true;
 
-    public Destination(Long id, String nome, String localizacao, String descricao, boolean disponivel) {
-        this.id = id;
-        this.nome = nome;
-        this.localizacao = localizacao;
-        this.descricao = descricao;
-        this.disponivel = disponivel;
-    }
-
+    // Getters e Setters
 
     public Long getId() {
         return id;
@@ -38,14 +40,6 @@ public class Destination {
 
     public void setLocalizacao(String localizacao) {
         this.localizacao = localizacao;
-    }
-
-    public String getDescricao() {
-        return descricao;
-    }
-
-    public void setDescricao(String descricao) {
-        this.descricao = descricao;
     }
 
     public boolean isDisponivel() {
