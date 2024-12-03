@@ -16,7 +16,7 @@ public class Destination {
     private String localizacao;
     private boolean disponivel = true;
 
-    // Getters e Setters
+    
 
     public Long getId() {
         return id;
